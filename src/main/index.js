@@ -21,6 +21,12 @@ function createWindow() {
     mainWindow.show()
   })
 
+  ipcMain.on('setWindowTitle', (event, title) => {
+    const webContents = event.sender
+    const win = BrowserWindow.fromWebContents(webContents)
+    win.setTitle(title)
+  })
+
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
