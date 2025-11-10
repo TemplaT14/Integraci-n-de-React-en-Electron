@@ -1,4 +1,6 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+// src/main/index.js
+
+import { app, shell, BrowserWindow, ipcMain } from 'electron' // ¡Asegúrate de que ipcMain está aquí!
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -21,12 +23,6 @@ function createWindow() {
     mainWindow.show()
   })
 
-  ipcMain.on('setWindowTitle', (event, title) => {
-    const webContents = event.sender
-    const win = BrowserWindow.fromWebContents(webContents)
-    win.setTitle(title)
-  })
-
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
@@ -39,6 +35,24 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  // === INICIO CÓDIGO EJERCICIOS ===
+
+  // 6. (EJERCICIO 6) Oyente del Renderer al Main
+  ipcMain.on('setWindowTitle', (event, title) => {
+    const webContents = event.sender
+    const win = BrowserWindow.fromWebContents(webContents)
+    win.setTitle(title)
+  })
+
+  // 7. (EJERCICIO 7) Manejador bidireccional (Renderer <-> Main)
+  ipcMain.handle('mi-mensaje-bidireccional', async (event, mensaje) => {
+    console.log(`Main: Recibido del renderer: "${mensaje}"`);
+    const respuesta = "¡Hola Renderer! He recibido tu mensaje.";
+    return respuesta; // Esto se devuelve al renderer
+  })
+
+  // === FIN CÓDIGO EJERCICIOS ===
 }
 
 // This method will be called when Electron has finished
@@ -52,11 +66,8 @@ app.whenReady().then(() => {
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
+    //optimizer.watchWindow(window)
   })
-
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
 
